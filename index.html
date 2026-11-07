@@ -10,6 +10,9 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://sinankhalid.me/">
 <link rel="icon" type="image/png" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,100..900;1,100..900&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
 /* ════════════════════════════════════════════
    SINAN KHALID — REDESIGN v2 (reference mirror)
@@ -30,7 +33,8 @@
   --paper-soft:rgba(236,233,225,.62);
   --paper-faint:rgba(236,233,225,.26);
   --pad:clamp(20px,4vw,46px);
-  --grot:"Helvetica Neue",Helvetica,"Neue Haas Grotesk Text Pro",Arial,-apple-system,BlinkMacSystemFont,sans-serif;
+  --grot:"Archivo","Helvetica Neue",Helvetica,"Neue Haas Grotesk Text Pro",Arial,-apple-system,BlinkMacSystemFont,sans-serif;
+  --serif:"Instrument Serif",Georgia,"Times New Roman",serif;
   --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,"Liberation Mono",monospace;
 }
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -144,18 +148,19 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
   line-height:1.08;letter-spacing:-.032em;font-weight:800;color:var(--ink);
 }
 .hero-hook span{display:block}
+.hero-hook span:last-child{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:-0.02em}
 .hero-body{
   margin-top:22px;max-width:470px;
   font-size:clamp(14px,1.2vw,16px);line-height:1.62;color:var(--ink-soft);
 }
-.hero-meta{position:relative;z-index:1;margin-top:auto;padding:0 var(--pad)}
+.hero-meta{position:relative;z-index:1;margin-top:auto;padding:0 var(--pad) clamp(12px,1.8svh,22px)}
 .meta-row{display:flex;align-items:center;gap:18px;border-top:1px solid rgba(23,21,18,.32);padding-top:14px}
 .hero-name{
   font-size:clamp(74px,15.4vw,294px);
   font-weight:900;letter-spacing:-.055em;white-space:nowrap;
   line-height:.84;color:var(--ink);
   margin:4px 0 0 -0.035em;
-  transform:translateY(0.14em);
+  transform:translateY(0);
 }
 
 /* ════════════════════════════
@@ -406,7 +411,7 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
   .brand-section{font-size:16px}
   .hero-copy{width:100%;padding:118px var(--pad) 0}
   .hero-body{max-width:100%}
-  .hero-name{font-size:23.2vw}
+  .hero-name{font-size:13.6vw;margin-left:-0.028em}
   .footer-name{font-size:23.2vw}
   .proj{grid-template-columns:1fr;gap:20px}
   .proj-desc{max-width:100%}
@@ -731,9 +736,9 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
       "  float pull=smoothstep(0.85,0.0,md)*u_amp;",
       // double domain warp
       "  vec2 q=vec2(fbm(p+vec2(0.0,0.0)+t),fbm(p+vec2(5.2,1.3)-t*0.8));",
-      "  vec2 r=vec2(fbm(p+2.15*q+vec2(1.7,9.2)+t*1.15+pull*0.9),",
-      "               fbm(p+2.15*q+vec2(8.3,2.8)-t*0.9+pull*0.9));",
-      "  float f=fbm(p+2.35*r+pull*0.6);",
+      "  vec2 r=vec2(fbm(p+2.15*q+vec2(1.7,9.2)+t*1.15+pull*1.2),",
+      "               fbm(p+2.15*q+vec2(8.3,2.8)-t*0.9+pull*1.2));",
+      "  float f=fbm(p+2.35*r+pull*0.85);",
       // ridged creases -> silky specular streaks
       "  float ridge=1.0-abs(2.0*fbm(p*1.55+1.5*r-t*0.75)-1.0);",
       "  ridge=pow(clamp(ridge,0.0,1.0),7.0);",
@@ -750,7 +755,7 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
       "  col+=hi*sheen*0.18;",
       // cursor glow ripple
       "  float ripple=sin(md*34.0-u_time*2.6)*exp(-md*4.6)*u_amp;",
-      "  col+=hi*max(0.0,ripple)*0.13;",
+      "  col+=hi*max(0.0,ripple)*0.19;",
       // gentle top light falloff + vignette
       "  col*=0.885+0.165*smoothstep(0.0,0.85,uv.y);",
       "  float vig=smoothstep(1.28,0.42,distance(uv,vec2(0.46,0.52)));",
@@ -822,8 +827,8 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
       } else if(!hovering){
         ampTarget = 0.55;
       }
-      smooth.x += (target.x - smooth.x) * 0.055;
-      smooth.y += (target.y - smooth.y) * 0.055;
+      smooth.x += (target.x - smooth.x) * 0.075;
+      smooth.y += (target.y - smooth.y) * 0.075;
       amp += (ampTarget - amp) * 0.045;
       resize();
       gl.uniform2f(uRes, canvas.width, canvas.height);
@@ -1130,14 +1135,14 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
   }
   document.querySelectorAll('canvas[data-field="pin"]').forEach(function(c){
     createDotField(c, {
-      spacing: 26, baseRadius: 1.15, pointerRadius: 155, push: 18,
+      spacing: 26, baseRadius: 1.15, pointerRadius: 180, push: 23,
       color: pinDotColor,
       parallax: function(){ return -(((typeof morphP === "number") ? morphP : 0) * 130); }
     });
   });
   document.querySelectorAll('canvas[data-field="static"]').forEach(function(c){
     createDotField(c, {
-      spacing: 23, baseRadius: 1.0, pointerRadius: 145, push: 15,
+      spacing: 23, baseRadius: 1.0, pointerRadius: 160, push: 18,
       color: function(){ return { r: 23, g: 21, b: 18, a: 0.20 }; }
     });
   });
