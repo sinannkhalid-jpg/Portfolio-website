@@ -167,7 +167,7 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
    DOTTED STATEMENTS
    ════════════════════════════ */
 
-/* ── pin: scroll-scrubbed dark -> cream morph, column lifts, texts wipe L->R ── */
+/* ── pin: scroll-scrubbed dark -> cream morph, centered texts crossfade ── */
 .pin{position:relative;height:380svh;background:#1D1B18}
 .pin-stage{position:sticky;top:0;height:100svh;overflow:hidden;background:#1D1B18;
   display:flex;align-items:center;justify-content:center;
@@ -184,7 +184,7 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
 .pin-beam{position:absolute;top:-20%;bottom:-20%;left:-45%;width:36vw;min-width:300px;z-index:4;pointer-events:none;opacity:0;
   background:linear-gradient(100deg,transparent 0%,rgba(240,236,226,.06) 24%,rgba(240,236,226,.28) 50%,rgba(240,236,226,.06) 76%,transparent 100%);
   transform:skewX(-9deg)}
-.pin-col{position:absolute;top:0;left:0;right:0;z-index:3;will-change:transform}
+.pin-col{position:absolute;inset:0;z-index:3;pointer-events:none}
 
 .pin{position:relative;isolation:isolate}
 .pin::before{content:"";position:absolute;left:0;right:0;top:-15svh;height:15svh;z-index:6;pointer-events:none;
@@ -196,17 +196,13 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
 .flow::before{content:"";position:absolute;left:0;right:0;top:0;
   height:clamp(72px,12svh,150px);z-index:-1;pointer-events:none;
   background:linear-gradient(180deg, var(--blend, transparent) 0%, transparent 100%)}
-.pin-text{height:100svh;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 var(--pad)}
-.pin-h{position:relative;font-weight:800;letter-spacing:-.045em;line-height:1.04;
+.pin-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;
+  padding:0 var(--pad);opacity:0;will-change:opacity,transform,filter}
+.pin-text:first-child{opacity:1}
+.pin-h{font-weight:800;letter-spacing:-.045em;line-height:1.04;
   font-size:clamp(34px,5.7vw,92px);margin:0}
-.pin-dim{display:block}
-.pin-bright{position:absolute;inset:0;display:block;
-  -webkit-mask-image:linear-gradient(90deg,#000 var(--edge,120%),transparent calc(var(--edge,120%) + 15%));
-          mask-image:linear-gradient(90deg,#000 var(--edge,120%),transparent calc(var(--edge,120%) + 15%))}
-.pin-text-1 .pin-dim,.pin-text-2 .pin-dim{color:rgba(236,233,225,.16)}
-.pin-text-1 .pin-bright,.pin-text-2 .pin-bright{color:var(--paper)}
-.pin-text-3 .pin-dim{color:rgba(23,21,18,.15)}
-.pin-text-3 .pin-bright{color:#232019}
+.pin-text-1 .pin-h,.pin-text-2 .pin-h{color:var(--paper)}
+.pin-text-3 .pin-h{color:#232019}
 
 .statement{
   min-height:76svh;display:flex;flex-direction:column;
@@ -477,24 +473,15 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
       <canvas class="dotfield" data-field="pin" aria-hidden="true"></canvas>
       <div class="pin-glow" aria-hidden="true"></div>
       <div class="pin-beam" id="pinBeam" aria-hidden="true"></div>
-      <div class="pin-col" id="pinCol">
+      <div class="pin-col">
         <div class="pin-text pin-text-1">
-          <h2 class="pin-h">
-            <span class="pin-dim">One exposed endpoint.<br>One leaked key.<br>That&rsquo;s all it takes.</span>
-            <span class="pin-bright" aria-hidden="true">One exposed endpoint.<br>One leaked key.<br>That&rsquo;s all it takes.</span>
-          </h2>
+          <h2 class="pin-h">One exposed endpoint.<br>One leaked key.<br>That&rsquo;s all it takes.</h2>
         </div>
         <div class="pin-text pin-text-2">
-          <h2 class="pin-h">
-            <span class="pin-dim">Why does security belong<br>in the first commit?</span>
-            <span class="pin-bright" aria-hidden="true">Why does security belong<br>in the first commit?</span>
-          </h2>
+          <h2 class="pin-h">Why does security belong<br>in the first commit?</h2>
         </div>
         <div class="pin-text pin-text-3">
-          <h2 class="pin-h">
-            <span class="pin-dim">Your app isn&rsquo;t just deployed.<br>It&rsquo;s watched, 24/7.</span>
-            <span class="pin-bright" aria-hidden="true">Your app isn&rsquo;t just deployed.<br>It&rsquo;s watched, 24/7.</span>
-          </h2>
+          <h2 class="pin-h">Your app isn&rsquo;t just deployed.<br>It&rsquo;s watched, 24/7.</h2>
         </div>
       </div>
     </div>
@@ -956,9 +943,7 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
   }
   if(pin){
     var pinStage = pin.querySelector(".pin-stage");
-    var pinCol = document.getElementById("pinCol");
     var pinTexts = [".pin-text-1", ".pin-text-2", ".pin-text-3"].map(function(s){ return pin.querySelector(s); });
-    var pinBrights = pinTexts.map(function(t){ return t.querySelector(".pin-bright"); });
     var pinGlow = pin.querySelector(".pin-glow");
     var pinBeam = pin.querySelector(".pin-beam");
     var DARK = [29,27,24], GRAY = [122,118,109], CREAM = [236,233,225];
@@ -982,9 +967,6 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
       morphP = p;
       morphZoneTop = pin.offsetTop;
       morphZoneBottom = pin.offsetTop + pin.offsetHeight;
-      // lift the inner column by two text-block heights over the whole scrub
-      var lift = p * 2 * vh;
-      pinCol.style.transform = "translateY(" + (-lift).toFixed(1) + "px)";
       // background: subtle vertical gradient, darkest at top early on
       var base = baseColor(p);
       var amp = 1 - smoothstepJS(0.55, 1.0, p); // gradient flattens to uniform cream by the end
@@ -999,18 +981,16 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
         pinBeam.style.left = (-45 + bt * 152).toFixed(1) + "%";
         pinBeam.style.opacity = (Math.sin(Math.PI * bt) * 0.95).toFixed(3);
       }
-      // per-text L->R soft-ramp bright layer, driven by distance from viewport center
-      // per-text wipe windows: rise on approach, fall on exit (text 3 stays bright)
-      var windows = [[0.02, 0.20, 0.34, 0.46],
-                     [0.18, 0.40, 0.50, 0.62],
-                     [0.58, 0.86, 2, 3]];
+      // centered texts: dip-to-void cuts — hold, dissolve to nothing, next title fades in
+      var rise = [1, smoothstepJS(0.38, 0.50, p), smoothstepJS(0.72, 0.86, p)];
+      var fall = [smoothstepJS(0.22, 0.34, p), smoothstepJS(0.57, 0.68, p), 0];
       for(var i = 0; i < 3; i++){
-        var w = windows[i];
-        var rise = smoothstepJS(w[0], w[1], p);
-        var fall = w[2] >= 1 ? 0 : smoothstepJS(w[2], w[3], p);
-        var r = rise * (1 - fall);
-        var edge = -24 + r * 148;                    // -24% .. 124%
-        pinBrights[i].style.setProperty("--edge", edge.toFixed(1) + "%");
+        var o = rise[i] * (1 - fall[i]);
+        pinTexts[i].style.opacity = o.toFixed(3);
+        var y = (1 - rise[i]) * 14 - fall[i] * 14;
+        var sc = 0.965 + 0.035 * o;
+        pinTexts[i].style.transform = "translateY(" + y.toFixed(1) + "px) scale(" + sc.toFixed(3) + ")";
+        pinTexts[i].style.filter = "blur(" + ((1 - o) * 2.5).toFixed(2) + "px)";
       }
       if(typeof updateNav === "function") updateNav();
     };
