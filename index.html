@@ -56,12 +56,25 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;tex
   background-size:280px 280px;
 }
 
-/* ── dotted grid ── */
+/* ── dotted grid (kept for stmt2) ── */
 .dotted{
   background-color:var(--cream);
   background-image:radial-gradient(circle,rgba(23,21,18,.17) 1.05px,transparent 1.15px);
   background-size:24px 24px;
 }
+/* ── morph zone (statement -> why): scroll-scrubbed bg ── */
+.morph{position:relative;background:var(--cream)}
+.morph .dots{
+  position:absolute;inset:0;pointer-events:none;opacity:.9;
+  background-image:radial-gradient(circle,rgba(23,21,18,.17) 1.05px,transparent 1.15px);
+  background-size:24px 24px;
+}
+.morph.midway .w{color:rgba(236,233,225,.16)}
+.morph.midway .w.on{color:var(--paper)}
+.morph.midway .statement-foot p{color:var(--paper-soft)}
+.why-q{color:var(--ink);transition:color .5s ease}
+.morph.midway .why-q{color:var(--paper)}
+.morph .w.on{color:var(--ink)}
 
 /* ── shared label row ── */
 .label-row{
@@ -92,11 +105,11 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
   display:flex;align-items:center;justify-content:space-between;gap:16px;
   padding:14px var(--pad);
   border-bottom:1px solid transparent;
-  transition:border-color .35s ease;
+  transition:border-color .5s ease .12s;
 }
 .nav.show-label{border-bottom-color:var(--line)}
 .nav.show-label.nav--dark{border-bottom-color:rgba(236,233,225,.16)}
-.brand-wrap{display:flex;flex-direction:column;justify-content:center;gap:1px;line-height:1.18;color:var(--ink)}
+.brand-wrap{display:flex;flex-direction:column;justify-content:center;gap:1px;line-height:1.18;color:var(--ink);transition:color .5s ease .14s}
 .brand-section{
   font-size:17.5px;font-weight:800;letter-spacing:-.02em;
   max-height:0;opacity:0;transform:translateY(7px);overflow:hidden;
@@ -107,7 +120,7 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
 .nav-links{display:flex;align-items:center;gap:clamp(18px,3vw,36px);position:absolute;left:50%;transform:translateX(-50%)}
 .nav-links a{
   font-size:13.5px;font-weight:600;color:var(--ink-soft);
-  transition:color .3s ease;letter-spacing:-.01em;white-space:nowrap;
+  transition:color .45s ease .14s;letter-spacing:-.01em;white-space:nowrap;
 }
 .nav-links a:hover{color:var(--ink)}
 .nav-cta{
@@ -115,7 +128,7 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
   background:var(--ink);color:var(--cream);
   font-size:13px;font-weight:700;letter-spacing:-.01em;
   border-radius:7px;padding:11px 18px;
-  transition:background .35s ease,color .35s ease,transform .2s ease;white-space:nowrap;
+  transition:background .5s ease .14s,color .5s ease .14s,transform .2s ease;white-space:nowrap;
 }
 .nav-cta:hover{transform:translateY(-1px)}
 .nav--dark .brand-wrap{color:var(--paper)}
@@ -453,14 +466,9 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
     </div>
   </section>
 
-  <!-- ══════════ WHY (dark) ══════════ -->
-  <section class="why on-dark" id="why" data-theme="dark" aria-label="Why security first">
-    <h2 class="why-q" data-fade>Why does security belong<br>in the first commit?</h2>
-    <div class="scroll-hint">Scroll</div>
-  </section>
-
   <!-- ══════════ STATEMENT 1 (dotted) ══════════ -->
-  <section class="statement dotted" aria-label="What keeps you up at night">
+  <section class="statement morph" id="morphStmt" aria-label="What keeps you up at night">
+    <div class="dots" aria-hidden="true"></div>
     <p class="statement-big" data-words>
       <span>One exposed endpoint.</span>
       <span>One leaked key.</span>
@@ -469,6 +477,13 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
     <div class="statement-foot">
       <p>Most breaches don&rsquo;t look like movie hacking. They look like an unpatched dependency, a forgotten debug route, a token pasted into a repo at 2 AM. I build so those doors never exist.</p>
     </div>
+  </section>
+
+  <!-- ══════════ WHY (dark) ══════════ -->
+  <section class="why morph" id="why" data-theme="dark" aria-label="Why security first">
+    <div class="dots" aria-hidden="true"></div>
+    <h2 class="why-q" data-fade>Why does security belong<br>in the first commit?</h2>
+    <div class="scroll-hint">Scroll</div>
   </section>
 
   <!-- ══════════ RECENT WORK ══════════ -->
@@ -834,6 +849,8 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
   /* ════════════════════════════════════
      2) NAV — dark invert + section indicator
      ════════════════════════════════════ */
+  var morphP = 0;
+  var morphZoneTop = Infinity, morphZoneBottom = Infinity;
   var nav = document.getElementById("nav");
   var brandSection = document.getElementById("brandSection");
   var darkSections = Array.prototype.slice.call(document.querySelectorAll("[data-theme='dark']"));
@@ -842,7 +859,9 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
   function updateNav(){
     ticking = false;
     var probe = 76;
-    var dark = darkSections.some(function(sec){
+    var probeDoc = window.scrollY + probe;
+    var inMorph = probeDoc >= morphZoneTop && probeDoc <= morphZoneBottom;
+    var dark = (inMorph && morphP > 0.36) || darkSections.some(function(sec){
       var r = sec.getBoundingClientRect();
       return r.top <= probe && r.bottom >= probe;
     });
@@ -905,6 +924,49 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
   window.addEventListener("scroll", onScrub, { passive:true });
   window.addEventListener("resize", onScrub, { passive:true });
   scrubWords();
+
+
+  /* ════════════════════════════════════
+     3b) MORPH ZONE — scroll-scrubbed background
+     cream -> warm gray -> near-black across statement -> why
+     ════════════════════════════════════ */
+  var morphStmt = document.getElementById("morphStmt");
+  var morphWhy = document.getElementById("why");
+  if(morphStmt && morphWhy){
+    var C1 = [236,233,225], C2 = [141,137,128], C3 = [29,27,24];
+    var lerp = function(a,b,t){ return Math.round(a + (b - a) * t); };
+    var zoneColor = function(p){
+      if(p < 0.45){ var t = p / 0.45; return [lerp(C1[0],C2[0],t), lerp(C1[1],C2[1],t), lerp(C1[2],C2[2],t)]; }
+      var t2 = (p - 0.45) / 0.55; return [lerp(C2[0],C3[0],t2), lerp(C2[1],C3[1],t2), lerp(C2[2],C3[2],t2)];
+    };
+    var morphTick = false;
+    var updateMorph = function(){
+      morphTick = false;
+      var vh = window.innerHeight;
+      var zoneTop = morphStmt.getBoundingClientRect().top + window.scrollY;
+      var zoneBottom = morphWhy.getBoundingClientRect().bottom + window.scrollY;
+      morphZoneTop = zoneTop; morphZoneBottom = zoneBottom;
+      var zoneH = Math.max(1, zoneBottom - zoneTop);
+      // progress starts when zone enters viewport, completes before fully past
+      var p = clamp01((vh - (zoneTop - window.scrollY) - 130) / (zoneH + vh * 0.25));
+      morphP = p;
+      var c = zoneColor(p);
+      var css = "rgb(" + c[0] + "," + c[1] + "," + c[2] + ")";
+      morphStmt.style.backgroundColor = css;
+      morphWhy.style.backgroundColor = css;
+      var dotsOpacity = clamp01(1 - (p - 0.18) / 0.52) * 0.9;
+      morphStmt.querySelectorAll(".dots").forEach(function(d){ d.style.opacity = dotsOpacity; });
+      morphWhy.querySelectorAll(".dots").forEach(function(d){ d.style.opacity = dotsOpacity; });
+      var mid = p > 0.36;
+      morphStmt.classList.toggle("midway", mid);
+      morphWhy.classList.toggle("midway", mid);
+      if(typeof updateNav === "function") updateNav();
+    };
+    var onMorph = function(){ if(!morphTick){ morphTick = true; requestAnimationFrame(updateMorph); } };
+    window.addEventListener("scroll", onMorph, { passive:true });
+    window.addEventListener("resize", onMorph, { passive:true });
+    updateMorph();
+  }
 
   /* ════════════════════════════════════
      4) FADE-UP for big headings
