@@ -167,10 +167,11 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
 .pin-stage{position:sticky;top:0;height:100svh;overflow:hidden;background:#1D1B18;
   display:flex;align-items:center;justify-content:center;
   box-shadow:inset 0 0 150px rgba(8,7,6,.5)}
-.pin-stage::before,.pin-stage::after{content:"";position:absolute;left:0;right:0;z-index:2;pointer-events:none;opacity:var(--seam,1)}
-.pin-stage::before{top:0;height:1px;
+.pin-stage::before{content:"";position:absolute;left:0;right:0;top:0;height:1px;z-index:2;pointer-events:none;
+  opacity:var(--seam,1);
   background:linear-gradient(90deg,transparent 0%,rgba(238,234,225,.34) 16%,rgba(238,234,225,.75) 50%,rgba(238,234,225,.34) 84%,transparent 100%)}
-.pin-stage::after{top:0;height:150px;
+.pin-stage::after{content:"";position:absolute;left:0;right:0;top:0;height:150px;z-index:2;pointer-events:none;
+  opacity:var(--seam,1);
   background:linear-gradient(180deg,rgba(238,234,225,.15) 0%,rgba(238,234,225,.035) 45%,transparent 100%)}
 .dotfield{position:absolute;inset:0;z-index:0;display:block;pointer-events:none;width:100%;height:100%}
 .pin-glow{position:absolute;left:0;right:0;bottom:-12%;height:72%;z-index:1;pointer-events:none;
@@ -179,6 +180,17 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
   background:linear-gradient(100deg,transparent 0%,rgba(240,236,226,.06) 24%,rgba(240,236,226,.28) 50%,rgba(240,236,226,.06) 76%,transparent 100%);
   transform:skewX(-9deg)}
 .pin-col{position:absolute;top:0;left:0;right:0;z-index:3;will-change:transform}
+
+.pin{position:relative;isolation:isolate}
+.pin::before{content:"";position:absolute;left:0;right:0;top:-15svh;height:15svh;z-index:6;pointer-events:none;
+  opacity:var(--feather,0);
+  background:linear-gradient(180deg, transparent 0%, rgba(24,23,20,.45) 55%, rgb(24,23,20) 100%)}
+
+/* ── section blends — every seam dissolves into its neighbour ── */
+.flow{position:relative;isolation:isolate}
+.flow::before{content:"";position:absolute;left:0;right:0;top:0;
+  height:clamp(72px,12svh,150px);z-index:-1;pointer-events:none;
+  background:linear-gradient(180deg, var(--blend, transparent) 0%, transparent 100%)}
 .pin-text{height:100svh;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 var(--pad)}
 .pin-h{position:relative;font-weight:800;letter-spacing:-.045em;line-height:1.04;
   font-size:clamp(34px,5.7vw,92px);margin:0}
@@ -547,7 +559,7 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
   </section>
 
   <!-- ══════════ WHAT I CAN HELP WITH (dark) ══════════ -->
-  <section class="services on-dark" id="services" data-theme="dark" data-nav-label="Services" aria-label="What I can help with">
+  <section class="services on-dark flow" id="services" style="--blend:var(--cream)" data-theme="dark" data-nav-label="Services" aria-label="What I can help with">
     <div class="label-row"><span class="mono-label">What I can help with</span></div>
     <div class="services-inner">
       <div class="services-art">
@@ -563,7 +575,7 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
   </section>
 
   <!-- ══════════ STATEMENT 2 (dotted) ══════════ -->
-  <section class="statement dotted statement-two-wrap" aria-label="How I work">
+  <section class="statement dotted statement-two-wrap flow" style="--blend:var(--dark)" aria-label="How I work">
     <canvas class="dotfield" data-field="static" aria-hidden="true"></canvas>
     <div class="statement-two">
       <p class="statement-big" data-words>
@@ -575,7 +587,7 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
   </section>
 
   <!-- ══════════ FAQ (dark) ══════════ -->
-  <section class="faq on-dark" id="faq" data-theme="dark" data-nav-label="FAQ" aria-label="Frequently asked questions">
+  <section class="faq on-dark flow" id="faq" style="--blend:var(--cream)" data-theme="dark" data-nav-label="FAQ" aria-label="Frequently asked questions">
     <div class="faq-inner">
       <div class="label-row"><span class="mono-label">FAQ</span></div>
       <h2 class="faq-h" data-fade><span>Hard questions,</span><span class="dim">honest answers.</span></h2>
@@ -653,7 +665,7 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
   </section>
 
   <!-- ══════════ FOOTER ══════════ -->
-  <footer class="footer" aria-label="Footer">
+  <footer class="footer flow" style="--blend:var(--dark)" aria-label="Footer">
     <div class="foot-grid">
       <div class="foot-col">
         <h4>Navigation</h4>
@@ -851,7 +863,7 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
   var morphZoneTop = Infinity, morphZoneBottom = Infinity;
   var nav = document.getElementById("nav");
   var brandSection = document.getElementById("brandSection");
-  var darkSections = Array.prototype.slice.call(document.querySelectorAll("[data-theme='dark']"));
+  var flowSections = Array.prototype.slice.call(document.querySelectorAll(".flow"));
   var labelled = Array.prototype.slice.call(document.querySelectorAll("[data-nav-label]"));
   var ticking = false;
   function updateNav(){
@@ -859,9 +871,14 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
     var probe = 76;
     var probeDoc = window.scrollY + probe;
     var inMorph = probeDoc >= morphZoneTop && probeDoc <= morphZoneBottom;
-    var dark = (inMorph && morphP < 0.55) || darkSections.some(function(sec){
+    var blendH = Math.min(150, Math.max(72, window.innerHeight * 0.12));
+    // theme under the nav, feather-aware: inside a blend zone the dominant half wins
+    var dark = (inMorph && morphP < 0.55) || flowSections.some(function(sec){
       var r = sec.getBoundingClientRect();
-      return r.top <= probe && r.bottom >= probe;
+      if(r.top > probe || r.bottom < probe) return false;
+      var secDark = sec.getAttribute("data-theme") === "dark";
+      var t = (probe - r.top) / blendH;
+      return t < 0.5 ? !secDark : secDark;
     });
     nav.classList.toggle("nav--dark", dark);
     var current = null;
@@ -965,7 +982,8 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
       pinCol.style.transform = "translateY(" + (-lift).toFixed(1) + "px)";
       // background: subtle vertical gradient, darkest at top early on
       var base = baseColor(p);
-      var top = shade(base, -0.16), bot = shade(base, 0.09);
+      var amp = 1 - smoothstepJS(0.55, 1.0, p); // gradient flattens to uniform cream by the end
+      var top = shade(base, -0.16 * amp), bot = shade(base, 0.09 * amp);
       pinStage.style.background = "linear-gradient(180deg, rgb(" + top.join(",") + ") 0%, rgb(" + bot.join(",") + ") 100%)";
       // seam hairline + top glow only live at the hand-off, then dissolve
       pinStage.style.setProperty("--seam", clamp01(1 - Math.max(0, p - 0.02) / 0.22).toFixed(3));
@@ -1002,11 +1020,17 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
   var heroEl = document.querySelector(".hero");
   var heroMetaEl = heroNameEl ? heroNameEl.parentNode : null;
   var heroCopyEl = document.querySelector(".hero-copy");
+  var pinEl = document.getElementById("pin");
+  var heroExitUpdate = function(){
+    var hx = clamp01(window.scrollY / Math.max(1, heroEl.offsetHeight));
+    if(pinEl) pinEl.style.setProperty("--feather", smoothstepJS(0.30, 0.82, hx).toFixed(3));
+  };
   if(heroNameEl && heroEl && heroMetaEl && !reduced){
     var heroTick = false;
     var updateHeroExit = function(){
       heroTick = false;
       var hp = clamp01(window.scrollY / Math.max(1, heroEl.offsetHeight * 0.88));
+      heroExitUpdate();
       var eMeta = smoothstepJS(0.06, 0.62, hp);
       heroMetaEl.style.opacity = (1 - eMeta).toFixed(3);
       heroMetaEl.style.transform = "translateY(" + (-54 * eMeta).toFixed(1) + "px) scale(" + (1 - 0.055 * eMeta).toFixed(4) + ")";
@@ -1028,12 +1052,14 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
   var pinPaper = { r: 236, g: 233, b: 225 }, pinInk = { r: 23, g: 21, b: 18 };
   var smoothstepGlob = (typeof smoothstepJS === "function") ? smoothstepJS : function(a,b,x){ var t = clamp01((x - a) / (b - a)); return t * t * (3 - 2 * t); };
   var pinDotColor = function(){
-    var t = smoothstepGlob(0.36, 0.64, (typeof morphP === "number") ? morphP : 0);
+    var mp = (typeof morphP === "number") ? morphP : 0;
+    var t = smoothstepGlob(0.36, 0.64, mp);
+    var fade = 1 - smoothstepGlob(0.80, 0.97, mp);
     return {
       r: Math.round(pinPaper.r + (pinInk.r - pinPaper.r) * t),
       g: Math.round(pinPaper.g + (pinInk.g - pinPaper.g) * t),
       b: Math.round(pinPaper.b + (pinInk.b - pinPaper.b) * t),
-      a: 0.34
+      a: 0.34 * fade
     };
   };
   function createDotField(canvas, opts){
