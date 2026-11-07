@@ -62,21 +62,6 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;tex
   background-image:radial-gradient(circle,rgba(23,21,18,.17) 1.05px,transparent 1.15px);
   background-size:24px 24px;
 }
-/* ── morph zone (statement -> why): scroll-scrubbed bg ── */
-.morph{position:relative;background:var(--cream)}
-.morph .dots{
-  position:absolute;inset:0;pointer-events:none;opacity:.9;
-  background-image:radial-gradient(circle,rgba(23,21,18,.17) 1.05px,transparent 1.15px);
-  background-size:24px 24px;
-}
-.morph.midway .w{color:rgba(236,233,225,.16)}
-.morph.midway .w.on{color:var(--paper)}
-.morph.midway .statement-foot p{color:var(--paper-soft)}
-.why-q{color:var(--ink);transition:color .5s ease}
-.morph.midway .why-q{color:var(--paper)}
-.morph .w.on{color:var(--ink)}
-
-/* ── shared label row ── */
 .label-row{
   display:flex;align-items:center;gap:18px;
   border-bottom:1px solid var(--line);
@@ -174,33 +159,29 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
 }
 
 /* ════════════════════════════
-   WHY (dark)
-   ════════════════════════════ */
-.why{
-  background:var(--dark);color:var(--paper);
-  min-height:100svh;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;text-align:center;
-  padding:110px var(--pad) 96px;position:relative;
-}
-.why-q{
-  font-size:clamp(38px,6.2vw,86px);font-weight:800;
-  letter-spacing:-.035em;line-height:1.03;max-width:1150px;
-}
-.scroll-hint{
-  position:absolute;bottom:32px;left:50%;transform:translateX(-50%);
-  font-family:var(--mono);font-size:9.5px;letter-spacing:.3em;
-  text-transform:uppercase;color:var(--paper-faint);
-  display:flex;flex-direction:column;align-items:center;gap:12px;
-}
-.scroll-hint::after{
-  content:"";width:1px;height:42px;background:linear-gradient(to bottom,transparent,var(--paper-faint));
-  animation:drip 1.8s ease-in-out infinite;
-}
-@keyframes drip{0%,100%{transform:scaleY(.4);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}}
-
-/* ════════════════════════════
    DOTTED STATEMENTS
    ════════════════════════════ */
+
+/* ── pin: scroll-scrubbed dark -> cream morph, column lifts, texts wipe L->R ── */
+.pin{position:relative;height:380svh;background:#1D1B18}
+.pin-stage{position:sticky;top:0;height:100svh;overflow:hidden;background:#1D1B18;
+  display:flex;align-items:center;justify-content:center}
+.pin-dots{position:absolute;inset:0;pointer-events:none}
+.pin-dots-light{background-image:radial-gradient(circle, rgba(236,233,225,.32) 1.1px, transparent 1.5px);background-size:26px 26px;opacity:.92}
+.pin-dots-dark{background-image:radial-gradient(circle, rgba(23,21,18,.34) 1.1px, transparent 1.5px);background-size:26px 26px;opacity:0}
+.pin-col{position:absolute;top:0;left:0;right:0;will-change:transform}
+.pin-text{height:100svh;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 var(--pad)}
+.pin-h{position:relative;font-weight:800;letter-spacing:-.045em;line-height:1.04;
+  font-size:clamp(34px,5.7vw,92px);margin:0}
+.pin-dim{display:block}
+.pin-bright{position:absolute;inset:0;display:block;
+  -webkit-mask-image:linear-gradient(90deg,#000 var(--edge,120%),transparent calc(var(--edge,120%) + 15%));
+          mask-image:linear-gradient(90deg,#000 var(--edge,120%),transparent calc(var(--edge,120%) + 15%))}
+.pin-text-1 .pin-dim,.pin-text-2 .pin-dim{color:rgba(236,233,225,.16)}
+.pin-text-1 .pin-bright,.pin-text-2 .pin-bright{color:var(--paper)}
+.pin-text-3 .pin-dim{color:rgba(23,21,18,.15)}
+.pin-text-3 .pin-bright{color:#232019}
+
 .statement{
   min-height:76svh;display:flex;flex-direction:column;
   justify-content:center;align-items:center;text-align:center;
@@ -210,8 +191,6 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
   font-size:clamp(32px,5.5vw,74px);font-weight:800;
   letter-spacing:-.032em;line-height:1.05;max-width:1250px;
 }
-.statement-foot{max-width:520px;margin:clamp(26px,4vw,48px) auto 0}
-.statement-foot p{font-size:15px;line-height:1.65;color:var(--ink-soft)}
 .statement-two{
   display:grid;grid-template-columns:1.25fr .75fr;
   gap:clamp(30px,5vw,80px);align-items:end;width:100%;max-width:1440px;margin:0 auto;
@@ -416,8 +395,7 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
   .statement-two .statement-big{text-align:left}
   .stmt-body{justify-self:start}
   .statement{text-align:left;align-items:flex-start}
-  .statement-foot{margin-left:0}
-  .foot-grid{grid-template-columns:1fr;gap:34px}
+    .foot-grid{grid-template-columns:1fr;gap:34px}
 }
 
 /* ── reduced motion ── */
@@ -466,24 +444,32 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
     </div>
   </section>
 
-  <!-- ══════════ STATEMENT 1 (dotted) ══════════ -->
-  <section class="statement morph" id="morphStmt" aria-label="What keeps you up at night">
-    <div class="dots" aria-hidden="true"></div>
-    <p class="statement-big" data-words>
-      <span>One exposed endpoint.</span>
-      <span>One leaked key.</span>
-      <span>That&rsquo;s all it takes.</span>
-    </p>
-    <div class="statement-foot">
-      <p>Most breaches don&rsquo;t look like movie hacking. They look like an unpatched dependency, a forgotten debug route, a token pasted into a repo at 2 AM. I build so those doors never exist.</p>
+  <!-- ══════════ THE PIN — why → deployed/watched, one scrubbed morph ══════════ -->
+  <section class="pin" id="pin" data-nav-label="My approach" aria-label="One exposed endpoint, why security comes first, and what happens after deploy">
+    <div class="pin-stage">
+      <div class="pin-dots pin-dots-light" aria-hidden="true"></div>
+      <div class="pin-dots pin-dots-dark" aria-hidden="true"></div>
+      <div class="pin-col" id="pinCol">
+        <div class="pin-text pin-text-1">
+          <h2 class="pin-h">
+            <span class="pin-dim">One exposed endpoint.<br>One leaked key.<br>That&rsquo;s all it takes.</span>
+            <span class="pin-bright" aria-hidden="true">One exposed endpoint.<br>One leaked key.<br>That&rsquo;s all it takes.</span>
+          </h2>
+        </div>
+        <div class="pin-text pin-text-2">
+          <h2 class="pin-h">
+            <span class="pin-dim">Why does security belong<br>in the first commit?</span>
+            <span class="pin-bright" aria-hidden="true">Why does security belong<br>in the first commit?</span>
+          </h2>
+        </div>
+        <div class="pin-text pin-text-3">
+          <h2 class="pin-h">
+            <span class="pin-dim">Your app isn&rsquo;t just deployed.<br>It&rsquo;s watched, 24/7.</span>
+            <span class="pin-bright" aria-hidden="true">Your app isn&rsquo;t just deployed.<br>It&rsquo;s watched, 24/7.</span>
+          </h2>
+        </div>
+      </div>
     </div>
-  </section>
-
-  <!-- ══════════ WHY (dark) ══════════ -->
-  <section class="why morph" id="why" data-theme="dark" aria-label="Why security first">
-    <div class="dots" aria-hidden="true"></div>
-    <h2 class="why-q" data-fade>Why does security belong<br>in the first commit?</h2>
-    <div class="scroll-hint">Scroll</div>
   </section>
 
   <!-- ══════════ RECENT WORK ══════════ -->
@@ -861,7 +847,7 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
     var probe = 76;
     var probeDoc = window.scrollY + probe;
     var inMorph = probeDoc >= morphZoneTop && probeDoc <= morphZoneBottom;
-    var dark = (inMorph && morphP > 0.36) || darkSections.some(function(sec){
+    var dark = (inMorph && morphP < 0.55) || darkSections.some(function(sec){
       var r = sec.getBoundingClientRect();
       return r.top <= probe && r.bottom >= probe;
     });
@@ -927,45 +913,123 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
 
 
   /* ════════════════════════════════════
-     3b) MORPH ZONE — scroll-scrubbed background
-     cream -> warm gray -> near-black across statement -> why
+     3c) PIN ZONE — scrubbed dark->cream morph + hero glitch exit
      ════════════════════════════════════ */
-  var morphStmt = document.getElementById("morphStmt");
-  var morphWhy = document.getElementById("why");
-  if(morphStmt && morphWhy){
-    var C1 = [236,233,225], C2 = [141,137,128], C3 = [29,27,24];
-    var lerp = function(a,b,t){ return Math.round(a + (b - a) * t); };
-    var zoneColor = function(p){
-      if(p < 0.45){ var t = p / 0.45; return [lerp(C1[0],C2[0],t), lerp(C1[1],C2[1],t), lerp(C1[2],C2[2],t)]; }
-      var t2 = (p - 0.45) / 0.55; return [lerp(C2[0],C3[0],t2), lerp(C2[1],C3[1],t2), lerp(C2[2],C3[2],t2)];
+  var pin = document.getElementById("pin");
+  function smoothstepJS(a, b, x){
+    var t = clamp01((x - a) / (b - a));
+    return t * t * (3 - 2 * t);
+  }
+  if(pin){
+    var pinStage = pin.querySelector(".pin-stage");
+    var pinCol = document.getElementById("pinCol");
+    var pinTexts = [".pin-text-1", ".pin-text-2", ".pin-text-3"].map(function(s){ return pin.querySelector(s); });
+    var pinBrights = pinTexts.map(function(t){ return t.querySelector(".pin-bright"); });
+    var dotsLight = pin.querySelector(".pin-dots-light");
+    var dotsDark = pin.querySelector(".pin-dots-dark");
+    var DARK = [29,27,24], GRAY = [122,118,109], CREAM = [236,233,225];
+    var lerpC = function(a,b,t){ return [Math.round(a[0]+(b[0]-a[0])*t), Math.round(a[1]+(b[1]-a[1])*t), Math.round(a[2]+(b[2]-a[2])*t)]; };
+    var baseColor = function(p){
+      if(p < 0.52){ return lerpC(DARK, GRAY, p / 0.52); }
+      return lerpC(GRAY, CREAM, (p - 0.52) / 0.48);
     };
-    var morphTick = false;
-    var updateMorph = function(){
-      morphTick = false;
+    var shade = function(c, pct){ // pct -1..+1 (negative darker)
+      return c.map(function(v){
+        return Math.max(0, Math.min(255, Math.round(pct < 0 ? v * (1 + pct) : v + (255 - v) * pct)));
+      });
+    };
+    var pinTick = false;
+    var updatePin = function(){
+      pinTick = false;
       var vh = window.innerHeight;
-      var zoneTop = morphStmt.getBoundingClientRect().top + window.scrollY;
-      var zoneBottom = morphWhy.getBoundingClientRect().bottom + window.scrollY;
-      morphZoneTop = zoneTop; morphZoneBottom = zoneBottom;
-      var zoneH = Math.max(1, zoneBottom - zoneTop);
-      // progress starts when zone enters viewport, completes before fully past
-      var p = clamp01((vh - (zoneTop - window.scrollY) - 130) / (zoneH + vh * 0.25));
+      var rect = pin.getBoundingClientRect();
+      var total = Math.max(1, pin.offsetHeight - vh);
+      var p = clamp01(-rect.top / total);
       morphP = p;
-      var c = zoneColor(p);
-      var css = "rgb(" + c[0] + "," + c[1] + "," + c[2] + ")";
-      morphStmt.style.backgroundColor = css;
-      morphWhy.style.backgroundColor = css;
-      var dotsOpacity = clamp01(1 - (p - 0.18) / 0.52) * 0.9;
-      morphStmt.querySelectorAll(".dots").forEach(function(d){ d.style.opacity = dotsOpacity; });
-      morphWhy.querySelectorAll(".dots").forEach(function(d){ d.style.opacity = dotsOpacity; });
-      var mid = p > 0.36;
-      morphStmt.classList.toggle("midway", mid);
-      morphWhy.classList.toggle("midway", mid);
+      morphZoneTop = pin.offsetTop;
+      morphZoneBottom = pin.offsetTop + pin.offsetHeight;
+      // lift the inner column by two text-block heights over the whole scrub
+      var lift = p * 2 * vh;
+      pinCol.style.transform = "translateY(" + (-lift).toFixed(1) + "px)";
+      // background: subtle vertical gradient, darkest at top early on
+      var base = baseColor(p);
+      var top = shade(base, -0.16), bot = shade(base, 0.09);
+      pinStage.style.background = "linear-gradient(180deg, rgb(" + top.join(",") + ") 0%, rgb(" + bot.join(",") + ") 100%)";
+      // dots: light on dark fades out, dark on light fades in (never absent)
+      dotsLight.style.opacity = (clamp01(1 - (p - 0.40) / 0.18) * 0.92).toFixed(3);
+      dotsDark.style.opacity  = (clamp01((p - 0.46) / 0.18) * 0.92).toFixed(3);
+      // per-text L->R soft-ramp bright layer, driven by distance from viewport center
+      // per-text wipe windows: rise on approach, fall on exit (text 3 stays bright)
+      var windows = [[0.02, 0.20, 0.34, 0.46],
+                     [0.18, 0.40, 0.50, 0.62],
+                     [0.58, 0.86, 2, 3]];
+      for(var i = 0; i < 3; i++){
+        var w = windows[i];
+        var rise = smoothstepJS(w[0], w[1], p);
+        var fall = w[2] >= 1 ? 0 : smoothstepJS(w[2], w[3], p);
+        var r = rise * (1 - fall);
+        var edge = -24 + r * 148;                    // -24% .. 124%
+        pinBrights[i].style.setProperty("--edge", edge.toFixed(1) + "%");
+      }
       if(typeof updateNav === "function") updateNav();
     };
-    var onMorph = function(){ if(!morphTick){ morphTick = true; requestAnimationFrame(updateMorph); } };
-    window.addEventListener("scroll", onMorph, { passive:true });
-    window.addEventListener("resize", onMorph, { passive:true });
-    updateMorph();
+    var onPin = function(){ if(!pinTick){ pinTick = true; requestAnimationFrame(updatePin); } };
+    window.addEventListener("scroll", onPin, { passive:true });
+    window.addEventListener("resize", onPin, { passive:true });
+    updatePin();
+  }
+
+  /* ── HERO WORD GLITCH — horizontal slices shear out as the hero exits ── */
+  var heroName = document.querySelector(".hero-name");
+  var heroEl = document.querySelector(".hero");
+  if(heroName && heroEl && !reduced){
+    var heroMeta = heroName.parentNode;
+    heroMeta.style.position = "relative";
+    var BANDS = 9;
+    var dirs = [-1, 1, -1, 1, -1, -1, 1, -1, 1];
+    var mags = [26, 44, 18, 58, 34, 70, 24, 48, 36];
+    var clones = [];
+    for(var gi = 0; gi < BANDS; gi++){
+      var c = heroName.cloneNode(true);
+      c.classList.add("glitch-clone");
+      c.setAttribute("aria-hidden", "true");
+      c.style.clipPath = "inset(" + (gi * (100 / BANDS)).toFixed(3) + "% -20px " + ((BANDS - 1 - gi) * (100 / BANDS)).toFixed(3) + "% -20px)";
+      c.style.display = "none";
+      heroMeta.appendChild(c);
+      clones.push(c);
+    }
+    var placeSlices = function(){
+      clones.forEach(function(c){
+        c.style.position = "absolute";
+        c.style.top = heroName.offsetTop + "px";
+        c.style.left = heroName.offsetLeft + "px";
+        c.style.margin = "0";
+        c.style.pointerEvents = "none";
+        c.style.zIndex = "2";
+        c.style.width = heroName.offsetWidth + "px";
+      });
+    };
+    placeSlices();
+    var glitchTick = false;
+    var updateGlitch = function(){
+      glitchTick = false;
+      var vh = window.innerHeight;
+      var hp = clamp01(window.scrollY / Math.max(1, heroEl.offsetHeight * 0.82));
+      var active = hp > 0.015 && hp < 0.98;
+      for(var i = 0; i < clones.length; i++){
+        var t = clamp01((hp - 0.14 - i * 0.028) / 0.52);
+        if(!active || t <= 0){ clones[i].style.display = "none"; continue; }
+        clones[i].style.display = "block";
+        var e = 1 - Math.pow(1 - t, 2.4);
+        clones[i].style.transform = "translateY(0.14em) translateX(" + (dirs[i] * e * mags[i]).toFixed(1) + "px)";
+        clones[i].style.opacity = (1 - smoothstepJS(0.45, 1, t)).toFixed(3);
+      }
+      heroName.style.opacity = (1 - smoothstepJS(0.42, 0.82, hp)).toFixed(3);
+    };
+    var onGlitch = function(){ if(!glitchTick){ glitchTick = true; requestAnimationFrame(updateGlitch); } };
+    window.addEventListener("scroll", onGlitch, { passive:true });
+    window.addEventListener("resize", function(){ placeSlices(); onGlitch(); }, { passive:true });
+    updateGlitch();
   }
 
   /* ════════════════════════════════════
@@ -1048,6 +1112,17 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
       it.addEventListener("focus", function(){ activate(i, true); });
       it.addEventListener("click", function(){ activate(i, true); });
     });
+    if("IntersectionObserver" in window){
+      var sio = new IntersectionObserver(function(entries){
+        entries.forEach(function(en){
+          if(en.isIntersecting){
+            var idx = serviceItems.indexOf(en.target);
+            if(idx > -1) activate(idx, true);
+          }
+        });
+      }, { rootMargin: "-38% 0px -38% 0px", threshold: 0 });
+      serviceItems.forEach(function(it){ sio.observe(it); });
+    }
     if(!reduced){
       cycleTimer = setInterval(function(){
         if(!userTookOver) activate(current + 1, false);
