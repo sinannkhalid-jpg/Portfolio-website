@@ -265,6 +265,7 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
    ════════════════════════════ */
 .services{
   background:var(--dark);color:var(--paper);
+  min-height:100svh;display:flex;flex-direction:column;justify-content:center;
   padding:clamp(72px,9vh,120px) var(--pad) clamp(80px,10vh,130px);
 }
 .services-inner{
@@ -1112,17 +1113,23 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
       it.addEventListener("focus", function(){ activate(i, true); });
       it.addEventListener("click", function(){ activate(i, true); });
     });
-    if("IntersectionObserver" in window){
-      var sio = new IntersectionObserver(function(entries){
-        entries.forEach(function(en){
-          if(en.isIntersecting){
-            var idx = serviceItems.indexOf(en.target);
-            if(idx > -1) activate(idx, true);
-          }
-        });
-      }, { rootMargin: "-38% 0px -38% 0px", threshold: 0 });
-      serviceItems.forEach(function(it){ sio.observe(it); });
-    }
+    var svcTick = false;
+    var pickService = function(){
+      svcTick = false;
+      var mid = window.innerHeight / 2;
+      var best = -1, bestDist = Infinity;
+      serviceItems.forEach(function(it, i){
+        var r = it.getBoundingClientRect();
+        if(r.bottom < 0 || r.top > innerHeight) return;
+        var d = Math.abs((r.top + r.bottom) / 2 - mid);
+        if(d < bestDist){ bestDist = d; best = i; }
+      });
+      if(best > -1) activate(best, true);
+    };
+    var onSvcScroll = function(){ if(!svcTick){ svcTick = true; requestAnimationFrame(pickService); } };
+    window.addEventListener("scroll", onSvcScroll, { passive:true });
+    window.addEventListener("resize", onSvcScroll, { passive:true });
+    pickService();
     if(!reduced){
       cycleTimer = setInterval(function(){
         if(!userTookOver) activate(current + 1, false);
