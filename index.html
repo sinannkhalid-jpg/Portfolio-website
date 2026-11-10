@@ -1025,8 +1025,8 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
       if(el) shatterTargets.push({ el: el, slices: cfg[1], clones: [] });
     });
     var bars = [];
-    var BAR_COUNT = 5;
-    var BAR_MAX = [46, 66, 88, 112, 136];
+    var BAR_COUNT = 6;
+    var BAR_MAX = [54, 70, 90, 114, 142, 172];
     for(var bi = 0; bi < BAR_COUNT; bi++){
       var bar = document.createElement("div");
       bar.className = "black-bar";
@@ -1063,8 +1063,7 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
         }
       });
       for(var j = 0; j < bars.length; j++){
-        var band = (j + 0.9) / (bars.length + 0.6);
-        bars[j].style.top = (band * 92 - 2).toFixed(2) + "%";
+        bars[j].style.top = (4 + j * 16).toFixed(2) + "%";
         bars[j].style.height = "0px";
       }
     }
@@ -1073,8 +1072,8 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
     var updateShatter = function(){
       shatterTick = false;
       var hp = clamp01(window.scrollY / Math.max(1, window.innerHeight * 0.80));
-      var appear = smoothstepJS(0.08, 0.22, hp);
-      var sever  = smoothstepJS(0.14, 0.86, hp);
+      var appear = smoothstepJS(0.05, 0.17, hp);
+      var sever  = smoothstepJS(0.10, 0.80, hp);
       var die    = 1 - smoothstepJS(0.70, 0.94, hp);
       shatterTargets.forEach(function(t){
         t.el.style.opacity = (1 - appear).toFixed(3);
@@ -1082,15 +1081,15 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
         for(var i = 0; i < S; i++){
           var c = t.clones[i];
           var fan = i - (S - 1) / 2;
-          var y = fan * 10.5 * sever;
-          var x = (i % 2 ? 1 : -1) * (4 + (i % 3) * 5.5) * sever;
+          var y = fan * 15.0 * sever;
+          var x = (i % 2 ? 1 : -1) * (5 + (i % 3) * 6.5) * sever;
           c.style.transform = "translate(" + x.toFixed(1) + "px," + y.toFixed(1) + "px)";
           c.style.opacity = (appear * die).toFixed(3);
         }
       });
       for(var j = 0; j < bars.length; j++){
-        var delay = j * 0.055;
-        var g = smoothstepJS(0.16 + delay, 0.88 + delay, hp);
+        var delay = j * 0.03;
+        var g = smoothstepJS(0.10 + delay, 0.86 + delay, hp);
         bars[j].style.height = (g * BAR_MAX[j]).toFixed(1) + "px";
       }
     };
