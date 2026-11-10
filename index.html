@@ -53,12 +53,6 @@ a{color:inherit;text-decoration:none}
 button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;text-align:left}
 :focus-visible{outline:2px solid currentColor;outline-offset:3px;border-radius:2px}
 
-/* ── grain ── */
-.grain{
-  position:fixed;inset:-100px;z-index:2000;pointer-events:none;opacity:.08;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
-  background-size:280px 280px;
-}
 
 /* ── dotted grid (kept for stmt2) ── */
 .dotted{
@@ -131,18 +125,18 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
    ════════════════════════════ */
 .hero-bay{height:calc(100svh + 80svh)}
 .hero{
-  position:sticky;top:0;height:100svh;min-height:600px;z-index:0;
+  position:sticky;top:0;height:100svh;z-index:0;
   overflow:hidden;display:flex;flex-direction:column;
   background:
     radial-gradient(120% 90% at 18% 78%, #DCD7CB 0%, rgba(236,233,225,0) 55%),
     radial-gradient(90% 70% at 82% 18%, #F2EFE7 0%, rgba(236,233,225,0) 60%),
     var(--cream);
 }
-.silk{position:absolute;inset:0;width:100%;height:100%;display:block}
+.silk{position:absolute;left:0;right:0;top:-340px;width:100%;height:calc(100% + 340px);display:block}
 .hero-copy{
   position:relative;z-index:1;
   margin-left:auto;width:min(600px,100%);
-  padding:clamp(118px,17vh,180px) var(--pad) 0 0;
+  padding:clamp(84px,15svh,180px) var(--pad) 0 0;
 }
 .hero-hook{
   font-size:clamp(26px,3.3vw,42px);
@@ -155,9 +149,16 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
   font-size:clamp(14px,1.2vw,16px);line-height:1.62;color:var(--ink-soft);
 }
 .hero-meta{position:relative;z-index:1;margin-top:auto;padding:0 var(--pad) clamp(12px,1.8svh,22px)}
+@media (max-height:640px){
+  .hero-hook{font-size:clamp(19px,4.4svh,32px)}
+  .hero-body{margin-top:10px;font-size:12.5px;line-height:1.45;max-width:44ch}
+  .meta-row{padding-top:8px}
+  .hero-name{font-size:clamp(48px,min(12.6vw,22svh),180px)}
+  .hero-copy{padding-top:clamp(48px,11svh,90px)}
+}
 .meta-row{display:flex;align-items:center;gap:18px;border-top:1px solid rgba(23,21,18,.32);padding-top:14px}
 .hero-name{
-  font-size:clamp(74px,15.4vw,294px);
+  font-size:clamp(58px,min(15.4vw,26svh),294px);
   font-weight:900;letter-spacing:-.055em;white-space:nowrap;
   line-height:.84;color:var(--ink);
   margin:4px 0 0 -0.035em;
@@ -168,9 +169,8 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
    DOTTED STATEMENTS
    ════════════════════════════ */
 
-/* ── hero shatter: hero tears into scanline slices, black bars swallow it ── */
-.slice-clone{pointer-events:none;z-index:3;text-shadow:0 0 14px rgba(240,238,228,.6), 0 0 3px rgba(240,238,228,.35)}
-.black-bar{position:absolute;left:-3%;width:106%;background:#141311;z-index:2;pointer-events:none}
+/* ── hero scanlines: straight full-width cuts riding the rising dark edge ── */
+.scanline{position:absolute;left:-3%;width:106%;background:#141311;z-index:2;pointer-events:none;opacity:0}
 
 /* ── pin: scroll-scrubbed dark -> cream morph, centered texts crossfade ── */
 .pin{position:relative;z-index:1;height:380svh;background:#1D1B18;margin-top:-80svh}
@@ -443,7 +443,6 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
 </head>
 <body>
 
-<div class="grain" aria-hidden="true"></div>
 
 <!-- ══════════ NAV ══════════ -->
 <header class="nav" id="nav">
@@ -708,9 +707,10 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
      Domain-warped fBM, warm cream palette,
      cursor-reactive, slow autonomous drift.
      ════════════════════════════════════ */
-  (function initSilk(){
+  function initSilk(){
     var canvas = document.getElementById("silk");
     if(!canvas) return;
+    canvas.dataset.dead = "";
     var gl = canvas.getContext("webgl", { antialias:false, alpha:false, depth:false, stencil:false, powerPreference:"high-performance" })
           || canvas.getContext("experimental-webgl");
     if(!gl){ canvas.style.display = "none"; return; }
@@ -719,7 +719,7 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
     var fsSrc = [
       "precision highp float;",
       "uniform vec2 u_res;uniform float u_time;uniform vec2 u_mouse;uniform float u_amp;",
-      "float hash(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}",
+      "float hash(vec2 p){p=fract(p*vec2(0.1031,0.1030));p+=dot(p,p+33.33);return fract((p.x+p.y)*p.x);}",
       "float noise(vec2 p){vec2 i=floor(p),f=fract(p);vec2 u=f*f*(3.0-2.0*f);",
       "  float a=hash(i),b=hash(i+vec2(1.,0.)),c=hash(i+vec2(0.,1.)),d=hash(i+vec2(1.,1.));",
       "  return mix(mix(a,b,u.x),mix(c,d,u.x),u.y);}",
@@ -743,7 +743,7 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
       "  float ridge=1.0-abs(2.0*fbm(p*1.55+1.5*r-t*0.75)-1.0);",
       "  ridge=pow(clamp(ridge,0.0,1.0),7.0);",
       // warm cream palette
-      "  vec3 shadow=vec3(0.672,0.643,0.561);",
+      "  vec3 shadow=vec3(0.792,0.768,0.709);",
       "  vec3 mid   =vec3(0.845,0.826,0.741);",
       "  vec3 light =vec3(0.912,0.896,0.827);",
       "  vec3 hi    =vec3(0.972,0.966,0.922);",
@@ -758,8 +758,8 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
       "  col+=hi*max(0.0,ripple)*0.19;",
       // gentle top light falloff + vignette
       "  col*=0.885+0.165*smoothstep(0.0,0.85,uv.y);",
-      "  float vig=smoothstep(1.28,0.42,distance(uv,vec2(0.46,0.52)));",
-      "  col=mix(col,vec3(0.905,0.894,0.862),(1.0-vig)*0.78);",
+      "  float vig=smoothstep(0.42,1.28,distance(uv,vec2(0.46,0.52)));",
+      "  col=mix(col,vec3(0.925,0.915,0.887),(1.0-vig)*0.55);",
       // film grain
       "  col+=(hash(uv*u_res+mod(u_time,10.0)*37.0)-0.5)*0.028;",
       "  gl_FragColor=vec4(col,1.0);",
@@ -816,6 +816,7 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
     var raf = null, running = true;
 
     function frame(){
+      if(canvas.dataset.dead === "1") return;
       raf = requestAnimationFrame(frame);
       var now = performance.now();
       // autonomous wander when idle (>2.2s since last move)
@@ -859,6 +860,13 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
     } else {
       frame();
     }
+  }
+  (function(){
+    var c = document.getElementById("silk");
+    if(!c) { initSilk(); return; }
+    c.addEventListener("webglcontextlost", function(e){ e.preventDefault(); c.dataset.dead = "1"; }, false);
+    c.addEventListener("webglcontextrestored", function(){ try { initSilk(); } catch(_){} }, false);
+    initSilk();
   })();
 
   /* ════════════════════════════════════
@@ -1016,87 +1024,62 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
     updatePin();
   }
 
-  /* ── HERO SHATTER — hero tears into horizontal slices as the black rises ── */
+  /* ── HERO SCANLINES — quiet, faithful to the reference capture: hero stays
+        untouched until the dark front reaches the wordmark; then straight
+        full-width black cuts ripple upward with the front and are swallowed. ── */
   var heroEl = document.querySelector(".hero");
   if(heroEl && !reduced){
-    var shatterTargets = [];
-    [[".hero-copy", 7], [".hero-meta", 8]].forEach(function(cfg){
-      var el = heroEl.querySelector(cfg[0]);
-      if(el) shatterTargets.push({ el: el, slices: cfg[1], clones: [] });
-    });
-    var bars = [];
-    var BAR_COUNT = 6;
-    var BAR_MAX = [54, 70, 90, 114, 142, 172];
-    for(var bi = 0; bi < BAR_COUNT; bi++){
-      var bar = document.createElement("div");
-      bar.className = "black-bar";
-      heroEl.appendChild(bar);
-      bars.push(bar);
+    var SCAN_N = 9;
+    var scans = [];
+    for(var si = 0; si < SCAN_N; si++){
+      var s = document.createElement("div");
+      s.className = "scanline";
+      heroEl.appendChild(s);
+      scans.push(s);
     }
-    function layoutSlices(){
+    var layoutScans = function(){
+      var heroH = heroEl.offsetHeight || 1;
+      var metaRow = heroEl.querySelector(".meta-row");
       var hr = heroEl.getBoundingClientRect();
-      shatterTargets.forEach(function(t){
-        t.clones.forEach(function(c){ if(c.parentNode) c.parentNode.removeChild(c); });
-        t.clones = [];
-        var r = t.el.getBoundingClientRect();
-        var top = r.top - hr.top, left = r.left - hr.left;
-        var S = t.slices;
-        for(var i = 0; i < S; i++){
-          var c = t.el.cloneNode(true);
-          c.removeAttribute("id");
-          c.classList.add("slice-clone");
-          c.setAttribute("aria-hidden", "true");
-          c.style.position = "absolute";
-          c.style.margin = "0";
-          c.style.top = top + "px";
-          c.style.left = left + "px";
-          c.style.width = r.width + "px";
-          c.style.zIndex = "3";
-          var gT = (i / S) * 100, gB = ((S - 1 - i) / S) * 100;
-          var cp = "inset(" + gT.toFixed(3) + "% -1% " + gB.toFixed(3) + "% -1%)";
-          c.style.clipPath = cp;
-          c.style.webkitClipPath = cp;
-          c.style.opacity = "0";
-          c.style.pointerEvents = "none";
-          heroEl.appendChild(c);
-          t.clones.push(c);
-        }
-      });
-      for(var j = 0; j < bars.length; j++){
-        bars[j].style.top = (4 + j * 16).toFixed(2) + "%";
-        bars[j].style.height = "0px";
+      var zoneTop = 0.60 * heroH; // scan zone ceiling: label/hairline area
+      if(metaRow){
+        var mr = metaRow.getBoundingClientRect();
+        zoneTop = Math.max(0, Math.min(heroH * 0.75, mr.top - hr.top - 34));
       }
-    }
-    layoutSlices();
-    var shatterTick = false;
-    var updateShatter = function(){
-      shatterTick = false;
-      var hp = clamp01(window.scrollY / Math.max(1, window.innerHeight * 0.80));
-      var appear = smoothstepJS(0.05, 0.17, hp);
-      var sever  = smoothstepJS(0.10, 0.80, hp);
-      var die    = 1 - smoothstepJS(0.70, 0.94, hp);
-      shatterTargets.forEach(function(t){
-        t.el.style.opacity = (1 - appear).toFixed(3);
-        var S = t.slices;
-        for(var i = 0; i < S; i++){
-          var c = t.clones[i];
-          var fan = i - (S - 1) / 2;
-          var y = fan * 15.0 * sever;
-          var x = (i % 2 ? 1 : -1) * (5 + (i % 3) * 6.5) * sever;
-          c.style.transform = "translate(" + x.toFixed(1) + "px," + y.toFixed(1) + "px)";
-          c.style.opacity = (appear * die).toFixed(3);
-        }
-      });
-      for(var j = 0; j < bars.length; j++){
-        var delay = j * 0.03;
-        var g = smoothstepJS(0.10 + delay, 0.86 + delay, hp);
-        bars[j].style.height = (g * BAR_MAX[j]).toFixed(1) + "px";
+      // anchors spread from the scan-zone ceiling down to the hero's bottom edge,
+      // thicker toward the bottom (the way the reference cuts thicken)
+      for(var j = 0; j < SCAN_N; j++){
+        var t = j / (SCAN_N - 1);
+        var anchor = zoneTop + t * (heroH - zoneTop);
+        var thick = 5 + Math.pow(t, 1.6) * 17;
+        scans[j].style.top = anchor.toFixed(1) + "px";
+        scans[j].dataset.thick = thick.toFixed(2);
       }
     };
-    var onShatter = function(){ if(!shatterTick){ shatterTick = true; requestAnimationFrame(updateShatter); } };
-    window.addEventListener("scroll", onShatter, { passive:true });
-    window.addEventListener("resize", function(){ layoutSlices(); onShatter(); }, { passive:true });
-    updateShatter();
+    layoutScans();
+    var scanTick = false;
+    var updateScans = function(){
+      scanTick = false;
+      var heroRect = heroEl.getBoundingClientRect();
+      var pin = document.getElementById("pin");
+      var panelTop = pin ? pin.getBoundingClientRect().top : window.innerHeight;
+      var frontLocal = panelTop - heroRect.top;   // dark front in hero-local px
+      for(var j = 0; j < SCAN_N; j++){
+        var thick = parseFloat(scans[j].dataset.thick || "8");
+        var anchor = parseFloat(scans[j].style.top);
+        var d = frontLocal - anchor;              // >0 front still below anchor, <=0 swallowed
+        var entered = clamp01((heroRect.height - frontLocal + 1) / 24);  // 0 at rest, 1 once the front is in
+        var ahead = 1 - Math.max(0, d) / 150;      // 0 far below -> 1 as the front nears
+        var behind = 1 + Math.min(0, d) / 50;      // 1 at the front -> 0 once swallowed
+        var vis = clamp01(ahead) * clamp01(behind) * entered;
+        scans[j].style.height = (thick * (0.32 + 0.68 * vis)).toFixed(1) + "px";
+        scans[j].style.opacity = Math.pow(vis, 1.35).toFixed(3);
+      }
+    };
+    var onScan = function(){ if(!scanTick){ scanTick = true; requestAnimationFrame(updateScans); } };
+    window.addEventListener("scroll", onScan, { passive:true });
+    window.addEventListener("resize", function(){ layoutScans(); onScan(); }, { passive:true });
+    updateScans();
   }
 
   /* ════════════════════════════════════
