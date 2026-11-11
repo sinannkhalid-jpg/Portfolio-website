@@ -123,9 +123,8 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
 /* ════════════════════════════
    HERO (live silk canvas)
    ════════════════════════════ */
-.hero-bay{height:calc(100svh + 80svh)}
 .hero{
-  position:sticky;top:0;height:100svh;z-index:0;
+  position:relative;height:100svh;z-index:0;
   overflow:hidden;display:flex;flex-direction:column;
   background:
     radial-gradient(120% 90% at 18% 78%, #DCD7CB 0%, rgba(236,233,225,0) 55%),
@@ -148,17 +147,16 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
   margin-top:22px;max-width:470px;
   font-size:clamp(14px,1.2vw,16px);line-height:1.62;color:var(--ink-soft);
 }
-.hero-meta{position:relative;z-index:1;margin-top:auto;padding:0 var(--pad) clamp(12px,1.8svh,22px)}
+.hero-meta{position:relative;z-index:1;margin-top:auto;padding:0 var(--pad) clamp(30px,4.4svh,48px)}
 @media (max-height:640px){
   .hero-hook{font-size:clamp(19px,4.4svh,32px)}
   .hero-body{margin-top:10px;font-size:12.5px;line-height:1.45;max-width:44ch}
   .meta-row{padding-top:8px}
-  .hero-name{font-size:clamp(48px,min(12.6vw,22svh),180px)}
   .hero-copy{padding-top:clamp(48px,11svh,90px)}
 }
 .meta-row{display:flex;align-items:center;gap:18px;border-top:1px solid rgba(23,21,18,.32);padding-top:14px}
 .hero-name{
-  font-size:clamp(58px,min(15.4vw,26svh),294px);
+  font-size:120px; /* sized by JS to the full measure — edge to edge, reference geometry */
   font-weight:900;letter-spacing:-.055em;white-space:nowrap;
   line-height:.84;color:var(--ink);
   margin:4px 0 0 -0.035em;
@@ -169,11 +167,13 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
    DOTTED STATEMENTS
    ════════════════════════════ */
 
-/* ── hero scanlines: straight full-width cuts riding the rising dark edge ── */
-.scanline{position:absolute;left:-3%;width:106%;background:#141311;z-index:2;pointer-events:none;opacity:0}
+/* ── hero exit shutter (reference): 16 dark slats scaleY 0→1 over the hero tail,
+      bottom row first, scrubbed from 'hero bottom at 60% vh' to hero exit ── */
+.shutter{position:absolute;left:0;right:0;bottom:0;z-index:2;pointer-events:none;display:flex;flex-direction:column;font-size:19.6px;color:#1D1B18}
+.shutter-row{height:3em;width:100%;background:currentColor;transform:scaleY(0);transform-origin:bottom center;backface-visibility:hidden;will-change:transform}
 
 /* ── pin: scroll-scrubbed dark -> cream morph, centered texts crossfade ── */
-.pin{position:relative;z-index:1;height:380svh;background:#1D1B18;margin-top:-80svh}
+.pin{position:relative;z-index:1;height:380svh;background:#1D1B18}
 .pin-stage{position:sticky;top:0;height:100svh;overflow:hidden;background:#1D1B18;
   display:flex;align-items:center;justify-content:center;
   box-shadow:inset 0 0 90px rgba(8,7,6,var(--vigA,.5)), inset 0 0 240px 40px rgba(5,4,3,var(--vigB,.78))}
@@ -418,13 +418,13 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
   .brand-section{font-size:16px}
   .hero-copy{width:100%;padding:118px var(--pad) 0}
   .hero-body{max-width:100%}
-  .hero-name{font-size:13.6vw;margin-left:-0.028em}
+  .hero-name{margin-left:-0.028em}
   .footer-name{font-size:23.2vw}
   .proj{grid-template-columns:1fr;gap:20px}
   .proj-desc{max-width:100%}
   .services-inner{grid-template-columns:1fr}
   .services-art{aspect-ratio:16/10;max-height:none}
-  .service-item{font-size:clamp(27px,8.6vw,40px);gap:14px}
+  .service-item{font-size:clamp(25px,8.6vw,40px);gap:12px;width:auto;max-width:100%}
   .statement-two{grid-template-columns:1fr;align-items:start;gap:24px}
   .statement-two .statement-big{text-align:left}
   .stmt-body{justify-self:start}
@@ -460,7 +460,6 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
 <main id="top">
 
   <!-- ══════════ HERO ══════════ -->
-  <div class="hero-bay">
   <section class="hero" aria-label="Sinan Khalid — intro">
     <canvas class="silk" id="silk" aria-hidden="true"></canvas>
     <div class="hero-copy">
@@ -477,7 +476,6 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
       <p class="hero-name" aria-hidden="true">sinan khalid</p>
     </div>
   </section>
-  </div>
 
   <!-- ══════════ THE PIN — why → deployed/watched, one scrubbed morph ══════════ -->
   <section class="pin" id="pin" data-theme="dark" data-nav-label="My approach" aria-label="One exposed endpoint, why security comes first, and what happens after deploy">
@@ -1024,63 +1022,71 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
     updatePin();
   }
 
-  /* ── HERO SCANLINES — quiet, faithful to the reference capture: hero stays
-        untouched until the dark front reaches the wordmark; then straight
-        full-width black cuts ripple upward with the front and are swallowed. ── */
+  /* ── HERO EXIT SHUTTER — the reference site's actual transition, verbatim:
+        hero scrolls naturally in flow; at the hero's tail, 16 dark slats
+        (6 mobile / 10 tablet) scaleY 0→1, origin bottom, bottom row first,
+        scrubbed from 'hero bottom at 60% vh' to hero exit. Quiet seam, no wipes. ── */
   var heroEl = document.querySelector(".hero");
-  if(heroEl && !reduced){
-    var SCAN_N = 9;
-    var scans = [];
-    for(var si = 0; si < SCAN_N; si++){
-      var s = document.createElement("div");
-      s.className = "scanline";
-      heroEl.appendChild(s);
-      scans.push(s);
+  var fitName = function(){
+    var name = document.querySelector(".hero-name");
+    if(!name) return;
+    var pad = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--pad")) || 40;
+    var target = Math.max(200, window.innerWidth - pad);   // from the left gutter, flush to the right edge
+    name.style.width = "max-content";                       // shrink-wrap the nowrap line for a true text measure
+    name.style.fontSize = "100px";
+    var w0 = name.getBoundingClientRect().width || 1;
+    name.style.width = "";
+    var fs = 100 * target / w0;
+    var cap = window.innerHeight * 0.30;                    // keep short/wide viewports sane
+    name.style.fontSize = Math.min(fs, cap).toFixed(1) + "px";
+  };
+  if(heroEl){
+    if(!reduced){
+      var shutRows = (window.matchMedia("(max-width:478px)").matches ? 6 : window.matchMedia("(max-width:991px)").matches ? 10 : 16);
+      var shutter = document.createElement("div");
+      shutter.className = "shutter";
+      shutter.setAttribute("aria-hidden", "true");
+      for(var ri = 0; ri < shutRows; ri++){
+        var row = document.createElement("div");
+        row.className = "shutter-row";
+        shutter.appendChild(row);
+      }
+      heroEl.appendChild(shutter);
+      var rows = Array.prototype.slice.call(shutter.children);
+      var DUR = 0.1, STAG = 0.01, TL = DUR + (rows.length - 1) * STAG;   // matches the reference timeline
+      var paintShutter = function(p){
+        var time = p * TL;
+        for(var i = 0; i < rows.length; i++){
+          var startT = (rows.length - 1 - i) * STAG;                     // stagger from 'end' (bottom row leads)
+          rows[i].style.transform = "scaleY(" + clamp01((time - startT) / DUR).toFixed(4) + ")";
+        }
+      };
+      var shutCur = 0, shutTarget = 0, shutRaf = 0, shutLast = 0;
+      var measureTarget = function(){
+        var vh = window.innerHeight || 1;
+        var bottom = heroEl.getBoundingClientRect().bottom;
+        shutTarget = clamp01((0.60 * vh - bottom) / (0.60 * vh));        // 0 until hero bottom hits 60% vh → 1 at exit
+      };
+      var tickShutter = function(now){
+        var dt = Math.min(0.05, (now - shutLast) / 1000) || 0.016; shutLast = now;
+        var k = 1 - Math.exp(-dt / 0.42);                                // GSAP scrub-style lag, silky catch-up
+        shutCur += (shutTarget - shutCur) * k;
+        if(Math.abs(shutTarget - shutCur) <= 0.0004){ shutCur = shutTarget; paintShutter(shutCur); shutRaf = 0; return; }
+        paintShutter(shutCur);
+        shutRaf = requestAnimationFrame(tickShutter);
+      };
+      var onShutter = function(){
+        measureTarget();
+        if(!shutRaf){ shutLast = performance.now(); shutRaf = requestAnimationFrame(tickShutter); }
+      };
+      window.addEventListener("scroll", onShutter, { passive:true });
+      window.addEventListener("resize", onShutter, { passive:true });
+      measureTarget(); shutCur = shutTarget; paintShutter(shutCur);
     }
-    var layoutScans = function(){
-      var heroH = heroEl.offsetHeight || 1;
-      var metaRow = heroEl.querySelector(".meta-row");
-      var hr = heroEl.getBoundingClientRect();
-      var zoneTop = 0.60 * heroH; // scan zone ceiling: label/hairline area
-      if(metaRow){
-        var mr = metaRow.getBoundingClientRect();
-        zoneTop = Math.max(0, Math.min(heroH * 0.75, mr.top - hr.top - 34));
-      }
-      // anchors spread from the scan-zone ceiling down to the hero's bottom edge,
-      // thicker toward the bottom (the way the reference cuts thicken)
-      for(var j = 0; j < SCAN_N; j++){
-        var t = j / (SCAN_N - 1);
-        var anchor = zoneTop + t * (heroH - zoneTop);
-        var thick = 5 + Math.pow(t, 1.6) * 17;
-        scans[j].style.top = anchor.toFixed(1) + "px";
-        scans[j].dataset.thick = thick.toFixed(2);
-      }
-    };
-    layoutScans();
-    var scanTick = false;
-    var updateScans = function(){
-      scanTick = false;
-      var heroRect = heroEl.getBoundingClientRect();
-      var pin = document.getElementById("pin");
-      var panelTop = pin ? pin.getBoundingClientRect().top : window.innerHeight;
-      var frontLocal = panelTop - heroRect.top;   // dark front in hero-local px
-      for(var j = 0; j < SCAN_N; j++){
-        var thick = parseFloat(scans[j].dataset.thick || "8");
-        var anchor = parseFloat(scans[j].style.top);
-        var d = frontLocal - anchor;              // >0 front still below anchor, <=0 swallowed
-        var entered = clamp01((heroRect.height - frontLocal + 1) / 24);  // 0 at rest, 1 once the front is in
-        var ahead = 1 - Math.max(0, d) / 150;      // 0 far below -> 1 as the front nears
-        var behind = 1 + Math.min(0, d) / 50;      // 1 at the front -> 0 once swallowed
-        var vis = clamp01(ahead) * clamp01(behind) * entered;
-        scans[j].style.height = (thick * (0.32 + 0.68 * vis)).toFixed(1) + "px";
-        scans[j].style.opacity = Math.pow(vis, 1.35).toFixed(3);
-      }
-    };
-    var onScan = function(){ if(!scanTick){ scanTick = true; requestAnimationFrame(updateScans); } };
-    window.addEventListener("scroll", onScan, { passive:true });
-    window.addEventListener("resize", function(){ layoutScans(); onScan(); }, { passive:true });
-    updateScans();
   }
+  window.addEventListener("resize", fitName, { passive:true });
+  fitName();
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(fitName);
 
   /* ════════════════════════════════════
      3d) INTERACTIVE DOT FIELDS — pointer-repulsion canvases (every dotted zone)
