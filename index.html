@@ -189,6 +189,7 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
   transform:skewX(-9deg)}
 .pin-col{position:absolute;inset:0;z-index:3;pointer-events:none}
 .pin-col::before{content:"";position:absolute;left:50%;top:50%;width:min(1180px,96%);height:72%;transform:translate(-50%,-50%);pointer-events:none;
+  opacity:var(--plate,1);
   background:radial-gradient(ellipse 62% 48% at 50% 50%, rgba(10,9,7,.62) 0%, rgba(10,9,7,.30) 48%, rgba(10,9,7,0) 76%)}
 .pin-text{z-index:1}
 
@@ -897,6 +898,7 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
       var r = sec.getBoundingClientRect();
       if(r.top > probe || r.bottom < probe) return false;
       var secDark = sec.getAttribute("data-theme") === "dark";
+      if(sec.id === "pin") secDark = morphP < 0.55;              // the pin morphs dark -> cream; nav inverts with it
       var t = (probe - r.top) / blendH;
       return t < 0.5 ? !secDark : secDark;
     });
@@ -998,10 +1000,13 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
       // background: subtle vertical gradient, darkest at top early on
       var base = baseColor(p);
       var ramp = smoothstepJS(0.04, 0.5, shutProgress); // flat #1D1B18 until the transition starts; the vignette rolls in with it
-      var vig = (1 - smoothstepJS(0.50, 1.0, p) * 0.62) * ramp; // vignette eases off toward the cream hand-off
+      var vigFade = 1 - smoothstepJS(0.42, 0.78, p);             // vignette is gone by the cream landing
+      var vig = vigFade * ramp;
+      pinStage.style.setProperty("--topVig", (ramp * vigFade).toFixed(3)); // black top dissolves into the cream landing too
+      pinStage.style.setProperty("--plate", (1 - smoothstepJS(0.30, 0.58, p)).toFixed(3)); // text plate dissolves with the field
       pinStage.style.setProperty("--vigA", (0.5 * vig).toFixed(3));
       pinStage.style.setProperty("--vigB", (0.78 * vig).toFixed(3));
-      var amp = smoothstepJS(0.0, 0.35, p) * (1 - smoothstepJS(0.55, 0.95, p)); // 0 at the hand-off (flat, matches the shutter), peaks mid-pin, 0 at the cream landing
+      var amp = smoothstepJS(0.0, 0.35, p) * (1 - smoothstepJS(0.5, 0.8, p)); // 0 at the hand-off (flat, matches the shutter), peaks mid-pin, 0 by the cream landing
       var top = shade(base, -0.16 * amp), bot = shade(base, 0.09 * amp);
       pinStage.style.background = "linear-gradient(180deg, rgb(" + top.join(",") + ") 0%, rgb(" + bot.join(",") + ") 100%)";
       if(pinGlow) pinGlow.style.opacity = (1 - smoothstepJS(0.14, 0.46, p)).toFixed(3);
@@ -1066,7 +1071,6 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
       var paintShutter = function(p){
         shutProgress = p;
         heroEl.style.setProperty("--zoom", (1 + 0.07 * p).toFixed(4));
-        if(shutPinStage) shutPinStage.style.setProperty("--topVig", smoothstepJS(0.04, 0.5, p).toFixed(3));
         var time = p * TL;
         for(var i = 0; i < rows.length; i++){
           var startT = (rows.length - 1 - i) * STAG;                     // stagger from 'end' (bottom row leads)
@@ -1109,7 +1113,7 @@ a:hover .arrow,button:hover .arrow{transform:translate(2px,-2px)}
   var pinDotColor = function(){
     var mp = (typeof morphP === "number") ? morphP : 0;
     var t = smoothstepGlob(0.36, 0.64, mp);
-    var fade = 1 - smoothstepGlob(0.80, 0.97, mp);
+    var fade = 1 - smoothstepGlob(0.68, 0.82, mp);
     return {
       r: Math.round(pinPaper.r + (pinInk.r - pinPaper.r) * t),
       g: Math.round(pinPaper.g + (pinInk.g - pinPaper.g) * t),
